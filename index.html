@@ -6,464 +6,569 @@
 <title>Diagram akordu</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: Arial, sans-serif; background: #fff; color: #000; padding: 1.2rem; }
-.wrap { max-width: 420px; }
-h1 { font-size: 1.2rem; margin-bottom: 0.9rem; }
-.board-wrap { position: relative; display: block; line-height: 0; }
+body {
+  font-family: system-ui, Arial, sans-serif;
+  background: #f0f0f0;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+.card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.10);
+  padding: 1.4rem;
+  width: 316px;
+}
+.board-wrap {
+  position: relative;
+  line-height: 0;
+  margin-bottom: 1rem;
+}
 canvas { display: block; cursor: pointer; }
 #chord-label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 280px;
-  height: 56px;
-  border: none;
-  outline: none;
-  background: #fff;
-  text-align: center;
-  font: bold 28px Arial;
-  color: #000;
-  line-height: 56px;
-  padding: 0;
+  position: absolute; top: 0; left: 0; width: 280px; height: 64px;
+  border: none; outline: none; background: transparent;
+  text-align: center; font: bold 48px system-ui,Arial; color: #111;
+  line-height: 64px; padding: 0;
 }
 #fret-start {
-  position: absolute;
-  top: 37px;
-  left: 60px;
-  width: 30px;
-  height: 22px;
-  border: none;
-  outline: none;
-  background: #fff;
-  text-align: center;
-  font: bold 13px Arial;
-  color: #000;
-  padding: 0;
-  -moz-appearance: textfield;
+  position: absolute; top: 55px; left: 60px; width: 30px; height: 22px;
+  border: none; outline: none; background: transparent;
+  text-align: center; font: bold 13px system-ui,Arial; color: #111;
+  padding: 0; -moz-appearance: textfield;
 }
 #fret-start::-webkit-outer-spin-button,
-#fret-start::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+#fret-start::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+  align-items: center;
 }
-.buttons { margin-top: 0.7rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-button { padding: 0.4rem 0.9rem; font-size: 0.9rem; font-family: inherit; border: 1px solid #000; border-radius: 4px; cursor: pointer; background: #fff; }
-button.primary { background: #000; color: #fff; }
-#copy-status { font-size: 0.82rem; color: #555; display: none; }
+.controls select, .controls .btn { width: 100%; }
+#size-input {
+  width: 100%;
+  padding: 0.38rem 0.3rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  border: 1px solid #e0e0e0;
+  border-radius: 7px;
+  background: #fafafa;
+  color: #111;
+  outline: none;
+  appearance: none;
+  text-align: center;
+}
+#size-input:focus { border-color: #bbb; background: #fff; }
+#size-input {
+  width: 100%;
+  padding: 0.38rem 0.3rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  border: 1px solid #e0e0e0;
+  border-radius: 7px;
+  background: #fafafa;
+  color: #111;
+  outline: none;
+  text-align: center;
+}
+#size-input:focus { border-color: #bbb; background: #fff; }
+.btn {
+  padding: 0;
+  height: 2.1rem;
+  line-height: 2.1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border-radius: 7px;
+  cursor: pointer;
+  border: 1px solid #e0e0e0;
+  background: #fafafa;
+  color: #444;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn:hover { background: #f0f0f0; }
+.btn-primary {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+  font-weight: 600;
+}
+.btn-primary:hover { background: #333; border-color: #333; }
+#copy-status {
+  font-size: 0.75rem; color: #888;
+  grid-column: 1 / -1;
+  display: none;
+  text-align: center;
+}
+#btn-clear, #btn-clear-all {
+font-size: 150%;
+}
 #dl { display: none; }
-#img-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
+#img-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 100;
+  align-items: center; justify-content: center;
+}
 #img-modal.show { display: flex; }
-#img-modal .box { background: #fff; padding: 1rem; border-radius: 6px; max-width: 90vw; max-height: 90vh; overflow: auto; text-align: center; }
-#img-modal img { max-width: 100%; display: block; margin: 0 auto 0.6rem; }
-#img-modal p { font-size: 0.85rem; color: #555; margin-bottom: 0.6rem; }
-#img-modal button { margin-top: 0.4rem; }
+#img-modal .box {
+  background: #fff; border-radius: 12px; padding: 1.2rem;
+  max-width: 90vw; text-align: center;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+}
+#img-modal img { max-width: 100%; display: block; margin: 0 auto 0.8rem; border-radius: 4px; }
+#img-modal p { font-size: 0.8rem; color: #666; margin-bottom: 0.8rem; }
+.modal-btns { display: flex; gap: 0.5rem; justify-content: center; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Diagram akordu</h1>
+<div class="card">
   <div class="board-wrap">
     <canvas id="cv"></canvas>
-    <input id="chord-label" type="text" maxlength="24" placeholder="np. Cmaj7">
+    <input id="chord-label" type="text" maxlength="24" placeholder="np. a">
     <input id="fret-start" type="number" min="1" max="14" value="1">
   </div>
-  <div class="buttons">
-    <button id="btn-clear">Wyczyść</button>
-    <button id="btn-copy">Kopiuj PNG</button>
+  <div class="controls">
+    <select id="size-input">
+      <option value="160">160 px</option>
+      <option value="280" selected>280 px</option>
+      <option value="560">560 px</option>
+      <option value="1120">1120 px</option>
+    </select>
+    <button class="btn" id="btn-clear" title="Usuń nuty i poprzeczki">♪ ✕</button>
+    <button class="btn" id="btn-clear-all" title="Usuń wszystko">🗑</button>
+    <button class="btn btn-primary" id="btn-copy">Kopiuj</button>
     <span id="copy-status"></span>
   </div>
-  <a id="dl"></a>
 </div>
+
 <div id="img-modal">
   <div class="box">
-    <p id="img-modal-msg">Kliknij prawym przyciskiem na obrazku &rarr; Kopiuj obraz</p>
+    <p id="img-modal-msg"></p>
     <img id="img-modal-img" alt="Diagram akordu">
-    <div class="buttons" style="justify-content:center;">
-      <button id="img-modal-download" class="primary">Pobierz PNG</button>
-      <button id="img-modal-close">Zamknij</button>
+    <div class="modal-btns">
+      <button class="btn btn-primary" id="img-modal-download">Pobierz PNG</button>
+      <button class="btn" id="img-modal-close">Zamknij</button>
     </div>
   </div>
 </div>
+
+<a id="dl"></a>
 <script>
 (function(){
+var isExport=false;
 
-var SCALE = 2;
-var COLS = 4;
-var ROWS = 6;
-var ML = 48;
-var MR = 16;
-var MT = 68;
-var MB = 16;
-var CS = 54;
-var RS = 36;
-var GW = COLS * CS;
-var GH = (ROWS - 1) * RS;
-var CW = ML + GW + MR;
-var CH = MT + GH + MB;
-var DOT_R = 12;
-var BAR_W = 24;
-
-var ROMAN  = ["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV"];
-var TUNING = [4,11,7,2,9,4];
-var NOTES  = ["C","C#","D","D#","E","F","F#","G","G#","A","B","H"];
-var SNAMES = ["e","H","G","D","A","E"];
-
-var startFret = 1;
-var strings = Array.from({length:6}, function(){ return {col:null, muted:false}; });
-var barres = [];
-var BAR_END_R = 14;
-
-var cv = document.getElementById("cv");
-cv.width  = CW * SCALE;
-cv.height = CH * SCALE;
-cv.style.width  = CW + "px";
-cv.style.height = CH + "px";
-var ctx = cv.getContext("2d");
-ctx.scale(SCALE, SCALE);
-
-function gx(col, ml) { return (ml === undefined ? ML : ml) + (col - 0.5) * CS; }
-function gy(si)  { return MT + si * RS; }
-
-function canvasXY(e) {
-  var r = cv.getBoundingClientRect();
-  var t = e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e);
-  return {
-    x: (t.clientX - r.left) * (CW / r.width),
-    y: (t.clientY - r.top)  * (CH / r.height)
-  };
+function setOverlayVisible(v){
+  document.getElementById("chord-label").style.display=v?"block":"none";
+  document.getElementById("fret-start").style.display=v?"block":"none";
 }
 
-function colFromX(x) { return Math.max(1, Math.min(COLS, Math.round((x - ML) / CS + 0.5))); }
-function siFromY(y)  { return Math.max(0, Math.min(ROWS-1, Math.round((y - MT) / RS))); }
+var COLS=4,ROWS=6,ML=48,MR=16,MT=90,MB=16,CS=54,RS=36;
+var GW=COLS*CS,GH=(ROWS-1)*RS,CW=ML+GW+MR,CH=MT+GH+MB;
+var DOT_R=12,BAR_W=24,BAR_END_R=14,SCALE=2;
+var ASPECT=CW/CH;
 
-function noteName(si, col) {
-  return NOTES[(TUNING[si] + startFret + col - 1) % 12];
+var ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV"];
+var TUNING=[4,11,7,2,9,4];
+var NOTES=["C","C#","D","D#","E","F","F#","G","G#","A","B","H"];
+var SNAMES=["e","H","G","D","A","E"];
+
+var startFret=1;
+var strings=Array.from({length:6},function(){return{col:null,muted:false};});
+var barres=[];
+
+var cv=document.getElementById("cv");
+cv.width=CW*SCALE; cv.height=CH*SCALE;
+cv.style.width=CW+"px"; cv.style.height=CH+"px";
+var ctx=cv.getContext("2d"); ctx.scale(SCALE,SCALE);
+
+document.getElementById("size-input").addEventListener("change",function(){});
+
+function exportDataURL(h){
+  var w=Math.round(h*ASPECT);
+  var t=document.createElement("canvas");
+  t.width=w; t.height=h;
+  var tc=t.getContext("2d"); tc.scale(w/CW,h/CH);
+  render(tc,ML,CW,true);
+  return t.toDataURL("image/png");
 }
 
-function barreAt(si, col) {
-  for (var i = 0; i < barres.length; i++) {
-    var b = barres[i];
-    if (b.from <= si && si <= b.to && (col === undefined || b.col === col)) return b;
+function exportBlob(h,cb){
+  var w=Math.round(h*ASPECT);
+  var t=document.createElement("canvas");
+  t.width=w; t.height=h;
+  var tc=t.getContext("2d"); tc.scale(w/CW,h/CH);
+  render(tc,ML,CW,true);
+  t.toBlob(cb,"image/png");
+}
+
+function gx(col,ml){return(ml===undefined?ML:ml)+(col-0.5)*CS;}
+function gy(si){return MT+si*RS;}
+
+function canvasXY(e){
+  var r=cv.getBoundingClientRect();
+  var t=e.touches?e.touches[0]:(e.changedTouches?e.changedTouches[0]:e);
+  return{x:(t.clientX-r.left)*(CW/r.width),y:(t.clientY-r.top)*(CH/r.height)};
+}
+
+function colFromX(x){return Math.max(1,Math.min(COLS,Math.round((x-ML)/CS+0.5)));}
+function siFromY(y){return Math.max(0,Math.min(ROWS-1,Math.round((y-MT)/RS)));}
+
+function noteName(si,col){
+  return NOTES[(TUNING[si]+startFret+col-1)%12];
+}
+
+function barreAt(si,col){
+  for(var i=0;i<barres.length;i++){
+    var b=barres[i];
+    if(b.from<=si&&si<=b.to&&(col===undefined||b.col===col))return b;
   }
   return null;
 }
-function inBarre(si) {
-  return !!barreAt(si);
+
+function inBarre(si){return!!barreAt(si);}
+
+function removeFromBarre(b,si){
+  var idx=barres.indexOf(b); if(idx<0)return;
+  if(b.from===b.to){barres.splice(idx,1);}
+  else if(si===b.from){b.from=si+1;}
+  else if(si===b.to){b.to=si-1;}
+  else{barres.push({col:b.col,from:si+1,to:b.to});b.to=si-1;}
 }
 
-function removeFromBarre(b, si) {
-  var idx = barres.indexOf(b);
-  if (idx < 0) return;
-  if (b.from === b.to) {
-    barres.splice(idx, 1);
-  } else if (si === b.from) {
-    b.from = si + 1;
-  } else if (si === b.to) {
-    b.to = si - 1;
-  } else {
-    barres.push({col: b.col, from: si + 1, to: b.to});
-    b.to = si - 1;
-  }
-}
-
-function normalizeBarres() {
-  for (var i = barres.length - 1; i >= 0; i--) {
-    var b = barres[i];
-    if (b.from > b.to || b.from < 0 || b.to > ROWS - 1) { barres.splice(i,1); continue; }
-    for (var s = b.from; s <= b.to; s++) {
-      if (strings[s].muted) { barres.splice(i,1); break; }
+function normalizeBarres(){
+  for(var i=barres.length-1;i>=0;i--){
+    var b=barres[i];
+    if(b.from>b.to||b.from<0||b.to>ROWS-1){barres.splice(i,1);continue;}
+    for(var s=b.from;s<=b.to;s++){
+      if(strings[s].muted){barres.splice(i,1);break;}
     }
   }
 
-  var bridged = true;
-  while (bridged) {
-    bridged = false;
-    for (var si = 0; si < ROWS && !bridged; si++) {
-      var st = strings[si];
-      if (st.muted || st.col === null) continue;
-      var endBarre = null, startBarre = null;
-      for (var k = 0; k < barres.length; k++) {
-        if (barres[k].col === st.col && barres[k].to === si - 1) endBarre = barres[k];
-        if (barres[k].col === st.col && barres[k].from === si + 1) startBarre = barres[k];
-      }
-      if (endBarre && startBarre) {
-        endBarre.to = startBarre.to;
-        barres.splice(barres.indexOf(startBarre), 1);
-        bridged = true;
+  var absorbed=true;
+  while(absorbed){
+    absorbed=false;
+    for(var si2=0;si2<ROWS&&!absorbed;si2++){
+      var st2=strings[si2];
+      if(st2.muted||st2.col===null)continue;
+      for(var k2=0;k2<barres.length;k2++){
+        var bk=barres[k2];
+        if(bk.col!==st2.col)continue;
+        if(bk.to===si2-1){bk.to=si2;strings[si2].col=null;absorbed=true;break;}
+        if(bk.from===si2+1){bk.from=si2;strings[si2].col=null;absorbed=true;break;}
       }
     }
   }
 
-  var changed = true;
-  while (changed) {
-    changed = false;
+  var bridged=true;
+  while(bridged){
+    bridged=false;
+    for(var si=0;si<ROWS&&!bridged;si++){
+      var st=strings[si];
+      if(st.muted||st.col===null)continue;
+      var eB=null,sB=null;
+      for(var k=0;k<barres.length;k++){
+        if(barres[k].col===st.col&&barres[k].to===si-1)eB=barres[k];
+        if(barres[k].col===st.col&&barres[k].from===si+1)sB=barres[k];
+      }
+      if(eB&&sB){
+        eB.to=sB.to;
+        barres.splice(barres.indexOf(sB),1);
+        bridged=true;
+      }
+    }
+  }
+
+  var changed=true;
+  while(changed){
+    changed=false;
     outer:
-    for (var a = 0; a < barres.length; a++) {
-      for (var bIdx = a + 1; bIdx < barres.length; bIdx++) {
-        var ba = barres[a], bb = barres[bIdx];
-        if (ba.col !== bb.col) continue;
-        if (ba.to + 1 < bb.from || bb.to + 1 < ba.from) continue;
-        ba.from = Math.min(ba.from, bb.from);
-        ba.to = Math.max(ba.to, bb.to);
-        barres.splice(bIdx, 1);
-        changed = true;
+    for(var a=0;a<barres.length;a++){
+      for(var bI=a+1;bI<barres.length;bI++){
+        var ba=barres[a],bb=barres[bI];
+        if(ba.col!==bb.col)continue;
+        if(ba.to+1<bb.from||bb.to+1<ba.from)continue;
+        ba.from=Math.min(ba.from,bb.from);
+        ba.to=Math.max(ba.to,bb.to);
+        barres.splice(bI,1);
+        changed=true;
         break outer;
       }
     }
   }
 
-  for (var i3 = barres.length - 1; i3 >= 0; i3--) {
-    var b3 = barres[i3];
-    if (b3.from === b3.to) {
-      if (strings[b3.from].col === null) strings[b3.from].col = b3.col;
-      barres.splice(i3, 1);
+  for(var i3=barres.length-1;i3>=0;i3--){
+    var b3=barres[i3];
+    if(b3.from===b3.to){
+      if(strings[b3.from].col===null)strings[b3.from].col=b3.col;
+      barres.splice(i3,1);
     }
   }
 
-  for (var i2 = barres.length - 1; i2 >= 0; i2--) {
-    var b2 = barres[i2];
-    var allDotted = true;
-    for (var s2 = b2.from; s2 <= b2.to; s2++) {
-      if (strings[s2].col !== b2.col) { allDotted = false; break; }
+  for(var i2=barres.length-1;i2>=0;i2--){
+    var b2=barres[i2],aD=true;
+    for(var s2=b2.from;s2<=b2.to;s2++){
+      if(strings[s2].col!==b2.col){aD=false;break;}
     }
-    if (allDotted) barres.splice(i2, 1);
+    if(aD)barres.splice(i2,1);
   }
 }
 
-function draw() {
+function draw(){
   normalizeBarres();
-  render(ctx, ML, CW);
+  render(ctx,ML,CW,false);
 }
 
-function render(c, ml, w) {
-  c.clearRect(0, 0, w, CH);
-  c.fillStyle = "#fff";
-  c.fillRect(0, 0, w, CH);
+function render(c,ml,w,exportMode){
+  c.clearRect(0,0,w,CH);
+  c.fillStyle="#fff";
+  c.fillRect(0,0,w,CH);
 
-  var lbl = document.getElementById("chord-label").value.trim();
-  if (lbl) {
-    c.fillStyle = "#000";
-    c.font = "bold 28px Arial";
-    c.textAlign = "center";
-    c.textBaseline = "middle";
-    c.fillText(lbl, w/2, MT/2 - 4);
+  if(exportMode){
+    var lbl=document.getElementById("chord-label").value.trim();
+    if(lbl){
+      c.fillStyle="#111";
+      c.font="bold 36px system-ui,Arial";
+      c.textAlign="center";
+      c.textBaseline="middle";
+      c.fillText(lbl,w/2,MT/2);
+    }
+    if(startFret>1){
+      c.fillStyle="#111";
+      c.font="bold 13px system-ui,Arial";
+      c.textAlign="center";
+      c.textBaseline="middle";
+      c.fillText(ROMAN[startFret],ml-30,MT+RS/2);
+    }
   }
 
-  if (startFret > 1) {
-    c.fillStyle = "#000";
-    c.font = "bold 13px Arial";
-    c.textAlign = "center";
-    c.textBaseline = "middle";
-    c.fillText(ROMAN[startFret], ml + CS / 2, MT - 20);
+  c.strokeStyle="#111";
+  c.lineWidth=startFret===1?5:1.5;
+  c.beginPath();
+  c.moveTo(ml,MT);
+  c.lineTo(ml,MT+GH);
+  c.stroke();
+
+  c.lineWidth=1.5;
+  for(var f=1;f<=COLS;f++){
+    var x=ml+f*CS;
+    c.beginPath();
+    c.moveTo(x,MT);
+    c.lineTo(x,MT+GH);
+    c.stroke();
   }
 
-  c.strokeStyle = "#000";
-  c.lineWidth = startFret === 1 ? 5 : 1.5;
-  c.beginPath(); c.moveTo(ml, MT); c.lineTo(ml, MT + GH); c.stroke();
-
-  c.lineWidth = 1.5;
-  for (var f = 1; f <= COLS; f++) {
-    var x = ml + f * CS;
-    c.beginPath(); c.moveTo(x, MT); c.lineTo(x, MT+GH); c.stroke();
+  for(var s=0;s<ROWS;s++){
+    var y=gy(s);
+    c.lineWidth=1.5;
+    c.beginPath();
+    c.moveTo(ml,y);
+    c.lineTo(ml+GW,y);
+    c.stroke();
   }
 
-  for (var s = 0; s < ROWS; s++) {
-    var y = gy(s);
-    c.beginPath(); c.moveTo(ml, y); c.lineTo(ml+GW, y); c.stroke();
-  }
-
-  for (var bidx = 0; bidx < barres.length; bidx++) {
-    var b = barres[bidx];
-    var bx = gx(b.col, ml);
-
-    if (b.from !== b.to) {
+  for(var bidx=0;bidx<barres.length;bidx++){
+    var b=barres[bidx];
+    var bx=gx(b.col,ml);
+    if(b.from!==b.to){
       c.save();
-      c.strokeStyle = "#000";
-      c.lineWidth = BAR_W;
-      c.lineCap = "round";
+      c.strokeStyle="#111";
+      c.lineWidth=BAR_W;
+      c.lineCap="round";
       c.beginPath();
-      c.moveTo(bx, gy(b.from));
-      c.lineTo(bx, gy(b.to));
+      c.moveTo(bx,gy(b.from));
+      c.lineTo(bx,gy(b.to));
       c.stroke();
       c.restore();
-
-      c.fillStyle = "#000";
-      c.beginPath(); c.arc(bx, gy(b.from), BAR_END_R, 0, 2*Math.PI); c.fill();
-      c.beginPath(); c.arc(bx, gy(b.to), BAR_END_R, 0, 2*Math.PI); c.fill();
+      c.fillStyle="#111";
+      c.beginPath();
+      c.arc(bx,gy(b.from),BAR_END_R,0,2*Math.PI);
+      c.fill();
+      c.beginPath();
+      c.arc(bx,gy(b.to),BAR_END_R,0,2*Math.PI);
+      c.fill();
     }
-
-    for (var bi = b.from; bi <= b.to; bi++) {
-      if (strings[bi].col !== null) continue;
-      c.fillStyle = "#fff";
-      c.font = "bold 10px Arial";
-      c.textAlign = "center";
-      c.textBaseline = "middle";
-      c.fillText(noteName(bi, b.col), bx, gy(bi));
+    for(var bi=b.from;bi<=b.to;bi++){
+      if(strings[bi].col!==null)continue;
+      c.fillStyle="#fff";
+      c.font="bold 10px system-ui,Arial";
+      c.textAlign="center";
+      c.textBaseline="middle";
+      c.fillText(noteName(bi,b.col),bx,gy(bi));
     }
   }
 
-  for (var si = 0; si < ROWS; si++) {
-    var st = strings[si];
-    var yp = gy(si);
-    var lx = ml - 22;
-
-    c.textAlign = "center";
-    c.textBaseline = "middle";
-
-    if (st.muted) {
-      c.fillStyle = "#000";
-      c.font = "bold 17px Arial";
-      c.fillText("\u00D7", lx, yp);
-    } else if (!inBarre(si) && st.col === null) {
-      c.fillStyle = "#333";
-      c.font = "12px Arial";
-      c.fillText(SNAMES[si], lx, yp);
+  for(var si=0;si<ROWS;si++){
+    var st=strings[si];
+    var yp=gy(si);
+    var lx=ml-22;
+    c.textAlign="center";
+    c.textBaseline="middle";
+    if(st.muted){
+      c.fillStyle="#111";
+      c.font="bold 17px system-ui,Arial";
+      c.fillText("×",lx,yp);
+    } else if(!inBarre(si)&&st.col===null){
+      c.fillStyle="#555";
+      c.font="12px system-ui,Arial";
+      c.fillText(SNAMES[si],lx,yp);
     }
-
-    if (!st.muted && st.col !== null) {
-      var dx = gx(st.col, ml);
+    if(!st.muted&&st.col!==null){
+      var dx=gx(st.col,ml);
       c.beginPath();
-      c.arc(dx, yp, DOT_R, 0, 2*Math.PI);
-      c.fillStyle = "#000";
+      c.arc(dx,yp,DOT_R,0,2*Math.PI);
+      c.fillStyle="#111";
       c.fill();
-      c.fillStyle = "#fff";
-      c.font = "bold 10px Arial";
-      c.textAlign = "center";
-      c.textBaseline = "middle";
-      c.fillText(noteName(si, st.col), dx, yp);
+      c.fillStyle="#fff";
+      c.font="bold 10px system-ui,Arial";
+      c.textAlign="center";
+      c.textBaseline="middle";
+      c.fillText(noteName(si,st.col),dx,yp);
     }
   }
 }
 
-var drag = null;
+var drag=null;
 
-cv.addEventListener("mousedown", onDown);
-cv.addEventListener("touchstart", onDown, {passive:false});
+cv.addEventListener("mousedown",onDown);
+cv.addEventListener("touchstart",onDown,{passive:false});
 
-function onDown(e) {
+function onDown(e){
   e.preventDefault();
-  var pt = canvasXY(e);
+  var pt=canvasXY(e);
 
-  if (pt.x < ML - 4) {
-    if (pt.y < MT - 10 || pt.y > MT + GH + 10) return;
-    var si = siFromY(pt.y);
-    strings[si].muted = !strings[si].muted;
-    if (strings[si].muted) {
-      strings[si].col = null;
-      for (var bk = barres.length - 1; bk >= 0; bk--) {
-        var bb = barres[bk];
-        if (si >= bb.from && si <= bb.to) removeFromBarre(bb, si);
+  if(pt.x<ML-4){
+    if(pt.y<MT-10||pt.y>MT+GH+10)return;
+    var si=siFromY(pt.y);
+    strings[si].muted=!strings[si].muted;
+    if(strings[si].muted){
+      strings[si].col=null;
+      for(var bk=barres.length-1;bk>=0;bk--){
+        var bb=barres[bk];
+        if(si>=bb.from&&si<=bb.to)removeFromBarre(bb,si);
       }
     }
     draw();
     return;
   }
 
-  if (pt.x > ML + GW + 8 || pt.y < MT - 10 || pt.y > MT + GH + 10) return;
+  if(pt.x>ML+GW+8||pt.y<MT-10||pt.y>MT+GH+10)return;
 
-  var col = colFromX(pt.x);
-  var si0 = siFromY(pt.y);
+  var col=colFromX(pt.x);
+  var si0=siFromY(pt.y);
 
-  var grabBarre = null, grabEnd = null;
-  for (var gi = 0; gi < barres.length; gi++) {
-    var gb = barres[gi];
-    if (gb.col !== col) continue;
-    if (si0 === gb.from) { grabBarre = gb; grabEnd = "from"; break; }
-    if (si0 === gb.to)   { grabBarre = gb; grabEnd = "to"; break; }
+  var gB=null,gE=null;
+  for(var gi=0;gi<barres.length;gi++){
+    var gb=barres[gi];
+    if(gb.col!==col)continue;
+    if(si0===gb.from){gB=gb;gE="from";break;}
+    if(si0===gb.to){gB=gb;gE="to";break;}
   }
 
-  drag = {col:col, si0:si0, siNow:si0, origin:pt, moved:false, barre:grabBarre, end:grabEnd};
+  drag={col:col,si0:si0,siNow:si0,origin:pt,moved:false,barre:gB,end:gE};
 
-  window.addEventListener("mousemove", onMove);
-  window.addEventListener("mouseup", onUp);
-  window.addEventListener("touchmove", onMove, {passive:false});
-  window.addEventListener("touchend", onUp);
+  window.addEventListener("mousemove",onMove);
+  window.addEventListener("mouseup",onUp);
+  window.addEventListener("touchmove",onMove,{passive:false});
+  window.addEventListener("touchend",onUp);
 }
 
-function onMove(e) {
-  if (!drag) return;
+function onMove(e){
+  if(!drag)return;
   e.preventDefault();
-  var pt = canvasXY(e);
-  if (Math.abs(pt.y - drag.origin.y) > 8) drag.moved = true;
-  drag.siNow = siFromY(pt.y);
-  drawPreview();
-}
-
-function drawPreview() {
+  var pt=canvasXY(e);
+  if(Math.abs(pt.y-drag.origin.y)>8)drag.moved=true;
+  drag.siNow=siFromY(pt.y);
   draw();
-  if (!drag || !drag.moved) return;
-  var bx = gx(drag.col);
+  if(!drag.moved)return;
 
-  if (drag.barre) {
-    var fromSi, toSi;
-    if (drag.end === "from") {
-      fromSi = Math.min(drag.siNow, drag.barre.to);
-      toSi   = drag.barre.to;
-    } else {
-      fromSi = drag.barre.from;
-      toSi   = Math.max(drag.siNow, drag.barre.from);
-    }
+  var bx=gx(drag.col);
+
+  if(drag.barre){
+    var fS,tS;
+    if(drag.end==="from"){fS=Math.min(drag.siNow,drag.barre.to);tS=drag.barre.to;}
+    else{fS=drag.barre.from;tS=Math.max(drag.siNow,drag.barre.from);}
     ctx.save();
-    ctx.strokeStyle = "rgba(0,0,0,0.35)";
-    ctx.lineWidth = BAR_W;
-    ctx.lineCap = "round";
-    ctx.beginPath(); ctx.moveTo(bx, gy(fromSi)); ctx.lineTo(bx, gy(toSi)); ctx.stroke();
+    ctx.strokeStyle="rgba(0,0,0,0.3)";
+    ctx.lineWidth=BAR_W;
+    ctx.lineCap="round";
+    ctx.beginPath();
+    ctx.moveTo(bx,gy(fS));
+    ctx.lineTo(bx,gy(tS));
+    ctx.stroke();
     ctx.restore();
     return;
   }
 
-  var fromSi = Math.min(drag.si0, drag.siNow);
-  var toSi   = Math.max(drag.si0, drag.siNow);
-  if (fromSi === toSi) return;
+  var fS=Math.min(drag.si0,drag.siNow);
+  var tS=Math.max(drag.si0,drag.siNow);
+  if(fS===tS)return;
+
   ctx.save();
-  ctx.strokeStyle = "rgba(0,0,0,0.25)";
-  ctx.lineWidth = BAR_W;
-  ctx.lineCap = "round";
-  ctx.beginPath(); ctx.moveTo(bx, gy(fromSi)); ctx.lineTo(bx, gy(toSi)); ctx.stroke();
+  ctx.strokeStyle="rgba(0,0,0,0.2)";
+  ctx.lineWidth=BAR_W;
+  ctx.lineCap="round";
+  ctx.beginPath();
+  ctx.moveTo(bx,gy(fS));
+  ctx.lineTo(bx,gy(tS));
+  ctx.stroke();
   ctx.restore();
 }
 
-function onUp(e) {
-  window.removeEventListener("mousemove", onMove);
-  window.removeEventListener("mouseup", onUp);
-  window.removeEventListener("touchmove", onMove);
-  window.removeEventListener("touchend", onUp);
-  if (!drag) return;
+function onUp(e){
+  window.removeEventListener("mousemove",onMove);
+  window.removeEventListener("mouseup",onUp);
+  window.removeEventListener("touchmove",onMove);
+  window.removeEventListener("touchend",onUp);
 
-  var col = drag.col, si0 = drag.si0, siNow = drag.siNow;
-  var moved = drag.moved;
-  var grabBarre = drag.barre, grabEnd = drag.end;
-  drag = null;
+  if(!drag)return;
 
-  if (grabBarre && moved) {
-    var fixed = (grabEnd === "from") ? grabBarre.to : grabBarre.from;
-    grabBarre.from = Math.min(fixed, siNow);
-    grabBarre.to   = Math.max(fixed, siNow);
-    for (var mi = grabBarre.from; mi <= grabBarre.to; mi++) strings[mi].muted = false;
-  } else if (moved && si0 !== siNow) {
-    var fromSi = Math.min(si0, siNow);
-    var toSi   = Math.max(si0, siNow);
-    var existingIdx = -1;
-    for (var bi2 = 0; bi2 < barres.length; bi2++) {
-      var bb2 = barres[bi2];
-      if (bb2.col === col && bb2.from === fromSi && bb2.to === toSi) { existingIdx = bi2; break; }
+  var col=drag.col,si0=drag.si0,siNow=drag.siNow,moved=drag.moved,gB=drag.barre,gE=drag.end;
+  drag=null;
+
+  if(gB&&moved&&si0!==siNow){
+    var fixed=(gE==="from")?gB.to:gB.from;
+    gB.from=Math.min(fixed,siNow);
+    gB.to=Math.max(fixed,siNow);
+    for(var mi=gB.from;mi<=gB.to;mi++)strings[mi].muted=false;
+  } else if(moved&&si0!==siNow){
+    var fS=Math.min(si0,siNow),tS=Math.max(si0,siNow),eI=-1;
+    for(var bi2=0;bi2<barres.length;bi2++){
+      var bb2=barres[bi2];
+      if(bb2.col===col&&bb2.from===fS&&bb2.to===tS){eI=bi2;break;}
     }
-    if (existingIdx >= 0) {
-      barres.splice(existingIdx, 1);
+    if(eI>=0){
+      barres.splice(eI,1);
     } else {
-      barres.push({col:col, from:fromSi, to:toSi});
-      for (var i = fromSi; i <= toSi; i++) strings[i].muted = false;
+      barres.push({col:col,from:fS,to:tS});
+      for(var i=fS;i<=tS;i++)strings[i].muted=false;
     }
   } else {
-    if (strings[si0].col === col) {
-      strings[si0].col = null;
+    if(strings[si0].col===col){
+      strings[si0].col=null;
     } else {
-      var hitBarre = barreAt(si0, col);
-      if (hitBarre) {
-        removeFromBarre(hitBarre, si0);
+      var hB=barreAt(si0,col);
+      if(hB){
+        removeFromBarre(hB,si0);
       } else {
-        strings[si0].col = col;
-        strings[si0].muted = false;
+        var adjB=null;
+        for(var ai=0;ai<barres.length;ai++){
+          var ab=barres[ai];
+          if(ab.col===col&&(ab.to===si0-1||ab.from===si0+1)){adjB=ab;break;}
+        }
+        if(adjB){
+          if(adjB.to===si0-1)adjB.to=si0;
+          else adjB.from=si0;
+          strings[si0].muted=false;
+        } else {
+          strings[si0].col=col;
+          strings[si0].muted=false;
+        }
       }
     }
   }
@@ -471,81 +576,62 @@ function onUp(e) {
   draw();
 }
 
-document.getElementById("chord-label").addEventListener("input", function() {
-  var inp = this, pos = inp.selectionStart, v = inp.value;
-  var fixed = v.length ? v[0] + v.slice(1).replace(/b/g,"\u266D") : v;
-  if (fixed !== v) { inp.value = fixed; inp.setSelectionRange(pos,pos); }
+document.getElementById("chord-label").addEventListener("input",function(){
+  var inp=this,pos=inp.selectionStart,v=inp.value;
+  var fixed=v.length?v[0]+v.slice(1).replace(/b/g,"\u266D"):v;
+  if(fixed!==v){inp.value=fixed;inp.setSelectionRange(pos,pos);}
   draw();
 });
 
-document.getElementById("fret-start").addEventListener("input", function() {
-  var v = parseInt(this.value, 10);
-  if (!isNaN(v) && v >= 1 && v <= 14) { startFret = v; draw(); }
+document.getElementById("fret-start").addEventListener("input",function(){
+  var v=parseInt(this.value,10);
+  if(!isNaN(v)&&v>=1&&v<=14){startFret=v;draw();}
 });
 
-document.getElementById("btn-clear").addEventListener("click", function() {
-  strings = Array.from({length:6}, function(){ return {col:null, muted:false}; });
-  barres = [];
-  startFret = 1;
-  document.getElementById("fret-start").value = "1";
-  document.getElementById("chord-label").value = "";
+document.getElementById("btn-clear").addEventListener("click",function(){
+  strings=Array.from({length:6},function(){return{col:null,muted:false};});
+  barres=[];
   draw();
 });
 
-document.getElementById("btn-copy").addEventListener("click", function() {
-  var statusEl = document.getElementById("copy-status");
+document.getElementById("btn-clear-all").addEventListener("click",function(){
+  strings=Array.from({length:6},function(){return{col:null,muted:false};});
+  barres=[];
+  startFret=1;
+  document.getElementById("fret-start").value="1";
+  document.getElementById("chord-label").value="";
+  draw();
+});
 
-  function showStatus(msg, ok) {
-    statusEl.textContent = msg;
-    statusEl.style.color = ok ? "#555" : "#c00";
-    statusEl.style.display = "inline";
-    setTimeout(function(){ statusEl.style.display = "none"; }, 4000);
-  }
-
-  var dataUrl = cv.toDataURL("image/png");
-
-  function showModal(msg) {
-    document.getElementById("img-modal-img").src = dataUrl;
-    document.getElementById("img-modal-msg").textContent = msg;
-    document.getElementById("img-modal").classList.add("show");
-  }
-
-  cv.toBlob(function(blob) {
-    if (blob && navigator.clipboard && window.ClipboardItem) {
-      try {
-        navigator.clipboard.write([new ClipboardItem({"image/png": blob})])
-          .then(function() {
-            showStatus("✓ Skopiowano do schowka", true);
-          })
-          .catch(function() {
-            showStatus("Nie udało się skopiować automatycznie", false);
-            showModal("Automatyczne kopiowanie nie zadziałało. Kliknij prawym przyciskiem na obrazku i wybierz \"Kopiuj obraz\", albo pobierz plik.");
-          });
-        return;
-      } catch (err) {
-        showStatus("Nie udało się skopiować automatycznie", false);
-        showModal("Automatyczne kopiowanie nie zadziałało. Kliknij prawym przyciskiem na obrazku i wybierz \"Kopiuj obraz\", albo pobierz plik.");
-        return;
-      }
+document.getElementById("btn-copy").addEventListener("click",function(){
+  var h=parseInt(document.getElementById("size-input").value,10)||280;
+  setOverlayVisible(false);
+  isExport=true;
+  exportBlob(h,function(blob){
+    isExport=false;
+    setOverlayVisible(true);
+    draw();
+    if(blob&&navigator.clipboard&&window.ClipboardItem){
+      navigator.clipboard.write([new ClipboardItem({"image/png":blob})]).catch(function(){});
     }
-    showStatus("Schowek niedostępny w tej przeglądarce", false);
-    showModal("Kopiowanie do schowka jest niedostępne. Kliknij prawym przyciskiem na obrazku i wybierz \"Kopiuj obraz\", albo pobierz plik.");
-  }, "image/png");
+  });
 });
 
-document.getElementById("img-modal-download").addEventListener("click", function() {
-  var a = document.getElementById("dl");
-  a.href = document.getElementById("img-modal-img").src;
-  var name = document.getElementById("chord-label").value.trim().replace(/[^a-zA-Z0-9#\u266D]/g,"_") || "akord";
-  a.download = name + ".png";
+document.getElementById("img-modal-download").addEventListener("click",function(){
+  var h=parseInt(document.getElementById("size-input").value,10)||280;
+  var a=document.getElementById("dl");
+  a.href=exportDataURL(h);
+  var name=document.getElementById("chord-label").value.trim().replace(/[^a-zA-Z0-9#]/g,"_")||"akord";
+  a.download=name+"_"+h+"px.png";
   a.click();
 });
 
-document.getElementById("img-modal-close").addEventListener("click", function() {
+document.getElementById("img-modal-close").addEventListener("click",function(){
   document.getElementById("img-modal").classList.remove("show");
 });
-document.getElementById("img-modal").addEventListener("click", function(e) {
-  if (e.target === this) this.classList.remove("show");
+
+document.getElementById("img-modal").addEventListener("click",function(e){
+  if(e.target===this)this.classList.remove("show");
 });
 
 draw();
